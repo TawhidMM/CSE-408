@@ -1,0 +1,774 @@
+openapi: 3.0.0
+info:
+  title: Patient Dashboard API
+  description: API for retrieving and managing patient dashboard data including appointments, prescriptions, medical tests, health summaries, and notifications
+  version: 1.0.0
+  contact:
+    name: Healthcare System API Support
+    email: api-support@healthcare-system.com
+
+servers:
+  - url: https://api.healthcare-system.com/v1
+    description: Production Server
+  - url: https://api-test.healthcare-system.com/v1
+    description: Test Server
+
+tags:
+  - name: Patient Dashboard
+    description: Endpoints for patient dashboard data
+  - name: Appointments
+    description: Patient appointment operations
+  - name: Prescriptions
+    description: Patient prescription operations
+  - name: Medical Tests
+    description: Patient medical test operations
+  - name: Health Summary
+    description: Patient health summary information
+  - name: Notifications
+    description: Patient notification operations
+  - name: Profile Management
+    description: Endpoints for managing patient profile information
+
+paths:
+  /patients/{patientId}/dashboard:
+    get:
+      summary: Get complete patient dashboard data
+      description: Retrieve all dashboard information for a specific patient in a single request
+      tags:
+        - Patient Dashboard
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+      responses:
+        '200':
+          description: Complete dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientDashboard'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /patients/{patientId}/appointments:
+    get:
+      summary: Get patient's upcoming appointments
+      description: Retrieve all upcoming appointments for a patient
+      tags:
+        - Appointments
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+      responses:
+        '200':
+          description: Appointments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Appointment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /patients/{patientId}/prescriptions:
+    get:
+      summary: Get patient's recent prescriptions
+      description: Retrieve recent prescriptions for a patient
+      tags:
+        - Prescriptions
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+      responses:
+        '200':
+          description: Prescriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prescription'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+          
+  /patients/{patientId}/prescriptions/{prescriptionId}:
+    get:
+      summary: Get full prescription details
+      description: Retrieve complete details of a specific prescription
+      tags:
+        - Prescriptions
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+        - name: prescriptionId
+          in: path
+          description: Unique identifier of the prescription
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Prescription details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /patients/{patientId}/medical-tests:
+    get:
+      summary: Get patient's recent medical tests
+      description: Retrieve recent medical tests for a patient
+      tags:
+        - Medical Tests
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+        - name: status
+          in: query
+          description: Filter by test status
+          schema:
+            type: string
+            enum: [pending, reviewed, all]
+            default: all
+      responses:
+        '200':
+          description: Medical tests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MedicalTest'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+          
+  /patients/{patientId}/medical-tests/{testId}/report:
+    get:
+      summary: Get medical test report
+      description: Download or view the medical test report
+      tags:
+        - Medical Tests
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+        - name: testId
+          in: path
+          description: Unique identifier of the medical test
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Test report retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTestDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /patients/{patientId}/health-summary:
+    get:
+      summary: Get patient's health summary
+      description: Retrieve health summary information for a patient
+      tags:
+        - Health Summary
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+      responses:
+        '200':
+          description: Health summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthSummary'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /patients/{patientId}/notifications:
+    get:
+      summary: Get patient's notifications
+      description: Retrieve all notifications for a patient
+      tags:
+        - Notifications
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+        - name: read
+          in: query
+          description: Filter by read status
+          schema:
+            type: string
+            enum: [read, unread, all]
+            default: all
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    
+    patch:
+      summary: Mark notifications as read
+      description: Mark one or more notifications as read
+      tags:
+        - Notifications
+      parameters:
+        - $ref: '#/components/parameters/PatientIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notificationIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: List of notification IDs to mark as read
+              required:
+                - notificationIds
+      responses:
+        '200':
+          description: Notifications marked as read successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  parameters:
+    PatientIdParam:
+      name: patientId
+      in: path
+      description: Unique identifier of the patient
+      required: true
+      schema:
+        type: string
+        format: uuid
+  
+  schemas:
+    PatientDashboard:
+      type: object
+      properties:
+        appointments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+        prescriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prescription'
+        medicalTests:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalTest'
+        healthSummary:
+          $ref: '#/components/schemas/HealthSummary'
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        unreadNotificationsCount:
+          type: integer
+          description: Count of unread notifications
+      
+    Appointment:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+        doctor:
+          $ref: '#/components/schemas/Doctor'
+        dateTime:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: Duration in minutes
+        hospital:
+          type: string
+        location:
+          type: object
+          properties:
+            building:
+              type: string
+            floor:
+              type: string
+            room:
+              type: string
+      required:
+        - appointmentId
+        - doctor
+        - dateTime
+        - location
+        - hospital
+       
+    
+    Prescription:
+      type: object
+      properties:
+        prescriptionId:
+          type: string
+          format: uuid
+        doctor:
+          $ref: '#/components/schemas/Doctor'
+        issuedDate:
+          type: string
+          format: date
+        summary:
+          type: string
+          description: Short summary of the prescription
+        status:
+          type: string
+          enum: [active, completed, cancelled]
+      required:
+        - prescriptionId
+        - doctor
+        - issuedDate
+        - summary
+        - status
+    
+    PrescriptionDetails:
+      allOf:
+        - $ref: '#/components/schemas/Prescription'
+        - type: object
+          properties:
+            patient:
+              $ref: '#/components/schemas/patient'
+            vitals:
+              type: object
+              properties:
+                bloodPressure:
+                  $ref: '#/components/schemas/Measurement'
+                weight:
+                  $ref: '#/components/schemas/Measurement'
+                glucose:
+                  $ref: '#/components/schemas/Measurement'
+                temperature:
+                  $ref: '#/components/schemas/Measurement'
+            symptoms: 
+              type: array
+              items:
+                type: string
+              description: Symptoms reported by the patient
+              example:
+                - "Headache"
+                - "Nausea"
+            diagnosis:
+              type: array
+              items:
+                type: string
+                description: List of diagnoses made by the doctor
+              example:
+                - "Hypertension"
+                - "Diabetes"
+            medications:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  dosage:
+                    type: string
+                  frequency:
+                    type: string
+                  duration:
+                    type: string
+                  instructions:
+                    type: string
+            notes:
+              type: string
+            nextAppointment:
+              type: string
+              description: Date and time of the next appointment
+              
+    MedicalTest:
+      type: object
+      properties:
+        testId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        orderedBy:
+          $ref: '#/components/schemas/Doctor'
+        orderedDate:
+          type: string
+          format: date
+        performedDate:
+          type: string
+          format: date
+      required:
+        - testId
+        - name
+        - orderedBy
+        - performedDate
+
+    
+    MedicalTestDetails:
+      allOf:
+        - $ref: '#/components/schemas/MedicalTest'
+        - type: object
+          properties:
+            patient:
+              $ref: '#/components/schemas/patient'
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/Measurement'
+                type: object
+                properties:
+                  referenceRange:
+                    type: object
+                    properties:
+                      male:
+                        $ref: '#/components/schemas/Measurement'
+                        type: object
+                      female:
+                        $ref: '#/components/schemas/Measurement'
+                        type: object
+                      children:
+                        $ref: '#/components/schemas/Measurement'
+                        type: object
+                  flag:
+                    type: string
+                    enum: [normal, low, high, critical]
+            notes:
+              type: string
+            performedBy:
+              $ref: '#/components/schemas/Doctor'
+            hospital:
+              $ref: '#/components/schemas/Hospital'
+            
+    
+    HealthSummary:
+      type: object
+      properties:
+        demographics:
+          type: object
+          properties:
+            age:
+              type: integer
+            gender:
+              type: string
+            bloodGroup:
+              type: string
+        chronicConditions:
+          type: array
+          items:
+            type: object
+            properties:
+              condition:
+                type: string
+              diagnosedDate:
+                type: string
+                format: date
+              severity:
+                type: string
+                enum: [mild, moderate, severe]
+        allergies:
+          type: array
+          items:
+            type: object
+            properties:
+              allergen:
+                type: string
+              reaction:
+                type: string
+              severity:
+                type: string
+                enum: [mild, moderate, severe]
+        vitalStats:
+          type: object
+          properties:
+            height:
+              type: number
+              format: float
+            weight:
+              type: number
+              format: float
+            bmi:
+              type: number
+              format: float
+            lastUpdated:
+              type: string
+              format: date
+      required:
+        - demographics
+    
+    Notification:
+      type: object
+      properties:
+        notificationId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [appointment, prescription, test-result, general]
+        title:
+          type: string
+        message:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        read:
+          type: boolean
+        relatedResourceId:
+          type: string
+          format: uuid
+          description: ID of the related resource (e.g., appointmentId, prescriptionId, testId)
+        relatedResourceType:
+          type: string
+          enum: [appointment, prescription, test-result, system]
+      required:
+        - notificationId
+        - type
+        - title
+        - message
+        - createdAt
+        - read
+
+    patient:
+      type: object
+      properties:
+        patientId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        age:
+          type: integer
+        bloodType:
+          type: string
+      required:
+        - patientId
+        - name
+
+    Doctor:
+      type: object
+      properties:
+        doctorId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        specialization:
+          type: string
+        designation: 
+          type: string
+        degrees:
+          type: array
+          items:
+            type: string
+      required:
+        - doctorId
+        - name
+        - specialization
+        - designation
+        - degrees
+    
+    Hospital:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          name:
+            type: string
+          address:
+            $ref: '#/components/schemas/Address'
+          contactNumber:
+            type: string
+          email:
+            type: string
+            format: email
+        required:
+          - id
+          - name
+          - address
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of items
+        limit:
+          type: integer
+          description: Number of items per page
+        offset:
+          type: integer
+          description: Current offset from the first item
+        nextOffset:
+          type: integer
+          description: Offset for the next page (null if no more pages)
+
+    Measurement:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the measurement (e.g., weight, blood pressure)
+        value:
+          type: string
+          description: The numeric measurement value
+        unit:
+          type: string
+          description: Unit of measurement (e.g., kg, mg/dL, bpm)
+      required:
+        - name
+        - value
+        - unit
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          description: Street address, house/building number
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+      required:
+        - street
+        - city
+        - state
+        - postalCode
+        - country
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+      required:
+        - code
+        - message
+  
+  responses:
+    UnauthorizedError:
+      description: Authentication credentials were missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    ForbiddenError:
+      description: The authenticated user does not have permission to access the requested resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFoundError:
+      description: The requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    BadRequestError:
+      description: The request was invalid or malformed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    
+  
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
