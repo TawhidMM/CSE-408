@@ -305,6 +305,80 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundError'
 
+  /patients/{patientId}/profile:
+    get:
+      summary: Get patient profile information
+      description: Retrieve complete profile information for a patient
+      tags:
+        - Profile Management
+      parameters:
+        - name: patientId
+          in: path
+          description: Unique identifier of the patient
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Profile information retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      patientId:
+                        type: string
+                        format: uuid
+                  - $ref: '#/components/schemas/PatientProfile'
+                  
+                      
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    
+    put:
+      summary: Update patient profile information
+      description: Update the complete profile information for a patient
+      tags:
+        - Profile Management
+      parameters:
+        - name: patientId
+          in: path
+          description: Unique identifier of the patient
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientProfile'
+      responses:
+        '200':
+          description: Profile information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfile'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    
+    
+  
+
 components:
   parameters:
     PatientIdParam:
@@ -708,10 +782,8 @@ components:
         country:
           type: string
       required:
-        - street
         - city
         - state
-        - postalCode
         - country
 
     Error:
@@ -726,6 +798,61 @@ components:
       required:
         - code
         - message
+
+    PatientProfile:
+      type: object
+      properties:
+        personalInfo:
+          type: object
+          properties:
+            firstName:
+              type: string
+            middleName:
+              type: string
+            lastName:
+              type: string
+            dateOfBirth:
+              type: string
+              format: date
+            gender:
+              type: string
+              enum: [male, female, other, prefer-not-to-say]
+            profileImage:
+              type: string
+              format: uri
+          required:
+            - firstName
+            - lastName
+            - dateOfBirth
+            - gender
+        contactInfo:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+            secondaryPhone:
+              type: string
+          required:
+            - email
+            - phone
+        address:
+          $ref: '#/components/schemas/Address'
+          description: Address of the patient
+          type: object
+          
+      required:
+        - patientId
+        - personalInfo
+        - contactInfo
+        - address
+        - createdAt
+        - updatedAt
+    
+    
+    
   
   responses:
     UnauthorizedError:
