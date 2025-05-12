@@ -32,6 +32,8 @@ tags:
     description: Endpoints for viewing doctor profiles and information
   - name: Appointment Management
     description: Endpoints for booking, viewing, and managing appointments
+  - name: Prescription Management
+    description: Endpoints for creating and managing prescriptions
 
 paths:
   /patients/{patientId}/dashboard:
@@ -91,8 +93,19 @@ paths:
       description: Retrieve recent prescriptions for a patient
       tags:
         - Prescriptions
-      parameters:
-        - $ref: '#/components/parameters/PatientIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prescriptionId:
+                  type: string
+                  format: uuid
+                  description: Unique identifier of the prescription
+              required:
+                - prescriptionId
       responses:
         '200':
           description: Prescriptions retrieved successfully
@@ -120,15 +133,33 @@ paths:
       description: Retrieve complete details of a specific prescription
       tags:
         - Prescriptions
-      parameters:
-        - $ref: '#/components/parameters/PatientIdParam'
-        - name: prescriptionId
-          in: path
-          description: Unique identifier of the prescription
-          required: true
-          schema:
-            type: string
-            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patientId:
+                  type: string
+                  format: uuid
+                  description: Filter prescriptions by patient ID
+                doctorId:
+                  type: string
+                  format: uuid
+                  description: Filter prescriptions by doctor ID
+                fromDate:
+                  type: string
+                  format: date
+                  description: Filter prescriptions from this date
+                toDate:
+                  type: string
+                  format: date
+                  description: Filter prescriptions until this date
+                status:
+                  type: string
+                  enum: [active, completed, cancelled]
+                  description: Filter prescriptions by status
       responses:
         '200':
           description: Prescription details retrieved successfully
@@ -438,8 +469,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundError'
 
-  
-
   /doctors/{doctorId}/reviews:
     get:
       summary: Get doctor reviews
@@ -682,6 +711,76 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+
+  /prescriptions:
+    post:
+      summary: Create a new prescription
+      description: Create a new prescription for a patient with medication details and test suggestions
+      tags:
+        - Prescription Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescriptionCreate'
+      responses:
+        '201':
+          description: Prescription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionDetails'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    
+  /prescriptions/update-status:
+    patch:
+      summary: Update prescription status
+      description: Update the status of a prescription
+      tags:
+        - Prescription Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prescriptionId:
+                  type: string
+                  format: uuid
+                  description: Unique identifier of the prescription
+                status:
+                  type: string
+                  enum: [active, completed, cancelled]
+                  description: New status of the prescription
+                notes:
+                  type: string
+                  description: add additional notes
+              required:
+                - prescriptionId
+                - status
+      responses:
+        '200':
+          description: Prescription status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
     
     
   
@@ -1337,6 +1436,81 @@ components:
       required:
         - patientId
         - name
+
+    PrescriptionCreate:
+      type: object
+      properties:
+        patientId:
+          type: string
+          format: uuid
+          description: ID of the patient receiving the prescription
+        doctorId:
+          type: string
+          format: uuid
+          description: ID of the doctor issuing the prescription
+        appointmentId:
+          type: string
+          format: uuid
+          description: Optional ID of the related appointment (if prescribed during an appointment)
+        hospitalId:
+          type: string
+          format: uuid
+          description: ID of the hospital where the prescription is issued
+        vitals:
+          type: object
+          properties:
+            bloodPressure:
+              $ref: '#/components/schemas/Measurement'
+            weight:
+              $ref: '#/components/schemas/Measurement'
+            glucose:
+              $ref: '#/components/schemas/Measurement'
+            temperature:
+              $ref: '#/components/schemas/Measurement'
+        symptoms: 
+          type: array
+          items:
+            type: string
+          description: Symptoms reported by the patient
+          example:
+            - "Headache"
+            - "Nausea"
+        diagnosis:
+          type: array
+          items:
+            type: string
+            description: List of diagnoses made by the doctor
+          example:
+            - "Hypertension"
+            - "Diabetes"
+        medications:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              dosage:
+                type: string
+              frequency:
+                type: string
+              duration:
+                type: string
+              instructions:
+                type: string
+        notes:
+          type: string
+        nextAppointment:
+          type: string
+          description: Date and time of the next appointment
+          
+      required:
+        - patientId
+        - doctorId
+        - hospitalId
+        - medications
+        - symptoms
+        - diagnosis
 
     
     
