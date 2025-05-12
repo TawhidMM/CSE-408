@@ -100,12 +100,26 @@ paths:
             schema:
               type: object
               properties:
-                prescriptionId:
+                patientId:
                   type: string
                   format: uuid
-                  description: Unique identifier of the prescription
-              required:
-                - prescriptionId
+                  description: Filter prescriptions by patient ID
+                doctorId:
+                  type: string
+                  format: uuid
+                  description: Filter prescriptions by doctor ID
+                fromDate:
+                  type: string
+                  format: date
+                  description: Filter prescriptions from this date
+                toDate:
+                  type: string
+                  format: date
+                  description: Filter prescriptions until this date
+                status:
+                  type: string
+                  enum: [active, completed, cancelled]
+                  description: Filter prescriptions by status
       responses:
         '200':
           description: Prescriptions retrieved successfully
@@ -140,26 +154,12 @@ paths:
             schema:
               type: object
               properties:
-                patientId:
+                prescriptionId:
                   type: string
                   format: uuid
-                  description: Filter prescriptions by patient ID
-                doctorId:
-                  type: string
-                  format: uuid
-                  description: Filter prescriptions by doctor ID
-                fromDate:
-                  type: string
-                  format: date
-                  description: Filter prescriptions from this date
-                toDate:
-                  type: string
-                  format: date
-                  description: Filter prescriptions until this date
-                status:
-                  type: string
-                  enum: [active, completed, cancelled]
-                  description: Filter prescriptions by status
+                  description: Unique identifier of the prescription
+              required:
+                - prescriptionId
       responses:
         '200':
           description: Prescription details retrieved successfully
@@ -466,6 +466,41 @@ paths:
                 $ref: '#/components/schemas/DoctorProfile'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      summary: Update doctor profile information
+      description: Update the complete profile information for a doctor
+      tags:
+        - Doctor Profile
+      parameters:
+        - name: doctorIdId
+          in: path
+          description: Unique identifier of the doctor
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorProfile'
+      responses:
+        '200':
+          description: Profile information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorProfile'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
         '404':
           $ref: '#/components/responses/NotFoundError'
 
