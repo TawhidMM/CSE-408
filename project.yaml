@@ -438,45 +438,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundError'
 
-  /doctors/{doctorId}/schedule:
-    get:
-      summary: Get doctor's schedule
-      description: Retrieve available visiting days and time slots for a doctor
-      tags:
-        - Doctor Profile
-      parameters:
-        - name: doctorId
-          in: path
-          description: Unique identifier of the doctor
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: startDate
-          in: query
-          description: Start date for the schedule (format YYYY-MM-DD)
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: endDate
-          in: query
-          description: End date for the schedule (format YYYY-MM-DD)
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: Doctor schedule retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DoctorSchedule'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+  
 
   /doctors/{doctorId}/reviews:
     get:
@@ -583,13 +545,12 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: date
+        - name: location
           in: query
-          description: Date for which to retrieve available slots (format YYYY-MM-DD)
+          description: Location of the appointment
           required: true
           schema:
             type: string
-            format: date
       responses:
         '200':
           description: Available slots retrieved successfully
@@ -598,7 +559,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DoctorSchedule'
+                  $ref: '#/components/schemas/AppointmentState'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
@@ -1327,6 +1288,33 @@ components:
           type: string
         floor:
           type: string
+      required:
+        - name
+        - address
+
+    AppointmentState:
+      type: object
+      properties:
+        doctorId:
+          type: string
+          format: uuid
+        slotState:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/TimeSlot'
+              - type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  available:
+                    type: boolean
+                  currentSerialNumber:
+                    type: integer
+                  expectedTime:
+                    type: string
+                    format: time
       required:
         - name
         - address
