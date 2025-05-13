@@ -1,17 +1,14 @@
 openapi: 3.0.0
 info:
-    title: Patient Dashboard API
-    description: API for retrieving and managing patient dashboard data including appointments, prescriptions, medical tests, health summaries, and notifications
+    title: MediLine Health Api documentation
+    description: API for retrieving and managing patient dashboard, Doctor profiles, appointments, prescriptions, medical tests, health summaries, and notifications.
     version: 1.0.0
-    contact:
-        name: Healthcare System API Support
-        email: api-support@healthcare-system.com
 
-servers:
-    - url: https://api.healthcare-system.com/v1
-      description: Production Server
-    - url: https://api-test.healthcare-system.com/v1
-      description: Test Server
+# servers:
+#     - url: https://api.healthcare-system.com/v1
+#       description: Production Server
+#     - url: https://api-test.healthcare-system.com/v1
+#       description: Test Server
 
 tags:
     - name: Patient Dashboard
@@ -36,14 +33,33 @@ tags:
       description: Endpoints for creating and managing prescriptions
 
 paths:
-    /patients/{patientId}/dashboard:
+    /dashboard:
         get:
             summary: Get complete patient dashboard data
             description: Retrieve all dashboard information for a specific patient in a single request
             tags:
                 - Patient Dashboard
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
+            # parameters:
+            #     - name: patientId
+            #       in: query
+            #       description: Unique identifier of the patient
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                            required:
+                                - patientId
             responses:
                 "200":
                     description: Complete dashboard data retrieved successfully
@@ -58,14 +74,33 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/appointments:
+    /appointments-list:
         get:
             summary: Get patient's upcoming appointments
             description: Retrieve all upcoming appointments for a patient
             tags:
                 - Appointments
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
+            # parameters:
+            #     - name: patientId
+            #       in: query
+            #       description: Unique identifier of the patient
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                            required:
+                                - patientId
             responses:
                 "200":
                     description: Appointments retrieved successfully
@@ -78,8 +113,8 @@ paths:
                                         type: array
                                         items:
                                             $ref: "#/components/schemas/Appointment"
-                                    pagination:
-                                        $ref: "#/components/schemas/Pagination"
+                                    # pagination:
+                                    #     $ref: "#/components/schemas/Pagination"
                 "401":
                     $ref: "#/components/responses/UnauthorizedError"
                 "403":
@@ -87,7 +122,7 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/prescriptions:
+    /prescriptions-list:
         get:
             summary: Get patient's recent prescriptions
             description: Retrieve recent prescriptions for a patient
@@ -132,8 +167,8 @@ paths:
                                         type: array
                                         items:
                                             $ref: "#/components/schemas/Prescription"
-                                    pagination:
-                                        $ref: "#/components/schemas/Pagination"
+                                    # pagination:
+                                    #     $ref: "#/components/schemas/Pagination"
                 "401":
                     $ref: "#/components/responses/UnauthorizedError"
                 "403":
@@ -141,7 +176,7 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/prescriptions/{prescriptionId}:
+    /prescriptions/details:
         get:
             summary: Get full prescription details
             description: Retrieve complete details of a specific prescription
@@ -174,21 +209,40 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/medical-tests:
+    /medical-tests-list:
         get:
             summary: Get patient's recent medical tests
             description: Retrieve recent medical tests for a patient
             tags:
                 - Medical Tests
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
-                - name: status
-                  in: query
-                  description: Filter by test status
-                  schema:
-                      type: string
-                      enum: [pending, reviewed, all]
-                      default: all
+            # parameters:
+            #     - name: patientId
+            #       in: query
+            #       description: Unique identifier of the patient
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            #     - name: status
+            #       in: query
+            #       description: Filter by test status
+            #       schema:
+            #           type: string
+            #           enum: [pending, reviewed, all]
+            #           default: all
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                            required:
+                                - patientId
             responses:
                 "200":
                     description: Medical tests retrieved successfully
@@ -201,8 +255,8 @@ paths:
                                         type: array
                                         items:
                                             $ref: "#/components/schemas/MedicalTest"
-                                    pagination:
-                                        $ref: "#/components/schemas/Pagination"
+                                    # pagination:
+                                    #     $ref: "#/components/schemas/Pagination"
                 "401":
                     $ref: "#/components/responses/UnauthorizedError"
                 "403":
@@ -210,21 +264,30 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/medical-tests/{testId}/report:
+    /medical-tests/report:
         get:
             summary: Get medical test report
-            description: Download or view the medical test reports
+            description: Download or view the medical test report
             tags:
                 - Medical Tests
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
-                - name: testId
-                  in: path
-                  description: Unique identifier of the medical test
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                                testId:
+                                    type: string
+                                    format: uuid
+                                    description: Unique identifier of the medical test
+                            required:
+                                - patientId
+                                - testId
             responses:
                 "200":
                     description: Test report retrieved successfully
@@ -239,14 +302,33 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/health-summary:
+    /health-summary:
         get:
             summary: Get patient's health summary
             description: Retrieve health summary information for a patient
             tags:
                 - Health Summary
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
+            # parameters:
+            #     - name: patientId
+            #       in: query
+            #       description: Unique identifier of the patient
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                            required:
+                                - patientId
             responses:
                 "200":
                     description: Health summary retrieved successfully
@@ -261,21 +343,45 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/notifications:
+    /notifications:
         get:
             summary: Get patient's notifications
             description: Retrieve all notifications for a patient
             tags:
                 - Notifications
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
-                - name: read
-                  in: query
-                  description: Filter by read status
-                  schema:
-                      type: string
-                      enum: [read, unread, all]
-                      default: all
+            # parameters:
+            #     - name: patientId
+            #       in: query
+            #       description: Unique identifier of the patient
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            #     - name: read
+            #       in: query
+            #       description: Filter by read status
+            #       schema:
+            #           type: string
+            #           enum: [read, unread, all]
+            #           default: all
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                                read:
+                                    type: string
+                                    enum: [all, unread, read]
+                                    description: Filter by read status
+                            required:
+                                - patientId
+                                - read
             responses:
                 "200":
                     description: Notifications retrieved successfully
@@ -288,8 +394,8 @@ paths:
                                         type: array
                                         items:
                                             $ref: "#/components/schemas/Notification"
-                                    pagination:
-                                        $ref: "#/components/schemas/Pagination"
+                                    # pagination:
+                                    #     $ref: "#/components/schemas/Pagination"
                 "401":
                     $ref: "#/components/responses/UnauthorizedError"
                 "403":
@@ -302,8 +408,6 @@ paths:
             description: Mark one or more notifications as read
             tags:
                 - Notifications
-            parameters:
-                - $ref: "#/components/parameters/PatientIdParam"
             requestBody:
                 required: true
                 content:
@@ -311,6 +415,10 @@ paths:
                         schema:
                             type: object
                             properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
                                 notificationIds:
                                     type: array
                                     items:
@@ -318,6 +426,7 @@ paths:
                                         format: uuid
                                     description: List of notification IDs to mark as read
                             required:
+                                - patientId
                                 - notificationIds
             responses:
                 "200":
@@ -340,20 +449,33 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /patients/{patientId}/profile:
+    /profile:
         get:
             summary: Get patient profile information
             description: Retrieve complete profile information for a patient
             tags:
                 - Profile Management
-            parameters:
-                - name: patientId
-                  in: path
-                  description: Unique identifier of the patient
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
+            # parameters:
+            #     - name: patientId
+            #       in: query
+            #       description: Unique identifier of the patient
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the patient
+                            required:
+                                - patientId
             responses:
                 "200":
                     description: Profile information retrieved successfully
@@ -380,20 +502,21 @@ paths:
             description: Update the complete profile information for a patient
             tags:
                 - Profile Management
-            parameters:
-                - name: patientId
-                  in: path
-                  description: Unique identifier of the patient
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/PatientProfile"
+                            allOf:
+                                - type: object
+                                  properties:
+                                      patientId:
+                                          type: string
+                                          format: uuid
+                                          description: Unique identifier of the patient
+                                  required:
+                                      - patientId
+                                - $ref: "#/components/schemas/PatientProfile"
             responses:
                 "200":
                     description: Profile information updated successfully
@@ -409,23 +532,36 @@ paths:
                     $ref: "#/components/responses/ForbiddenError"
                 "404":
                     $ref: "#/components/responses/NotFoundError"
-    /doctors:
+    /doctor-list:
         get:
             summary: Get list of doctors
             description: Retrieve a list of doctors with basic information
             tags:
                 - Doctor Profile
-            parameters:
-                - name: specialization
-                  in: query
-                  description: Filter by doctor specialization
-                  schema:
-                      type: string
-                - name: location
-                  in: query
-                  description: Search doctor by location
-                  schema:
-                      type: string
+            # parameters:
+            #     - name: specialization
+            #       in: query
+            #       description: Filter by doctor specialization
+            #       schema:
+            #           type: string
+            #     - name: location
+            #       in: query
+            #       description: Search doctor by location
+            #       schema:
+            #           type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                specialization:
+                                    type: string
+                                    description: Filter by doctor specialization
+                                location:
+                                    type: string
+                                    description: Search doctor by location
             responses:
                 "200":
                     description: Doctors retrieved successfully
@@ -442,20 +578,33 @@ paths:
                 "401":
                     $ref: "#/components/responses/UnauthorizedError"
 
-    /doctors/{doctorId}:
+    /doctor/profile:
         get:
             summary: Get doctor profile
             description: Retrieve complete profile information for a specific doctor
             tags:
                 - Doctor Profile
-            parameters:
-                - name: doctorId
-                  in: path
-                  description: Unique identifier of the doctor
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
+            # parameters:
+            #     - name: doctorId
+            #       in: query
+            #       description: Unique identifier of the doctor
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                doctorId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the doctor
+                            required:
+                                - doctorId
             responses:
                 "200":
                     description: Doctor profile retrieved successfully
@@ -473,20 +622,21 @@ paths:
             description: Update the complete profile information for a doctor
             tags:
                 - Doctor Profile
-            parameters:
-                - name: doctorIdId
-                  in: path
-                  description: Unique identifier of the doctor
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/DoctorProfile"
+                            allOf:
+                                - type: object
+                                  properties:
+                                      doctorId:
+                                          type: string
+                                          format: uuid
+                                          description: Unique identifier of the doctor
+                                  required:
+                                      - doctorId
+                                - $ref: "#/components/schemas/DoctorProfile"
             responses:
                 "200":
                     description: Profile information updated successfully
@@ -503,27 +653,42 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /doctors/{doctorId}/reviews:
+    /doctor/reviews:
         get:
             summary: Get doctor reviews
             description: Retrieve patient reviews for a specific doctor
             tags:
                 - Doctor Profile
-            parameters:
-                - name: doctorId
-                  in: path
-                  description: Unique identifier of the doctor
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
-                - name: rating
-                  in: query
-                  description: Filter by rating
-                  schema:
-                      type: integer
-                      minimum: 1
-                      maximum: 5
+            # parameters:
+            #     - name: doctorId
+            #       in: query
+            #       description: Unique identifier of the doctor
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            #     - name: rating
+            #       in: query
+            #       description: Filter by rating
+            #       schema:
+            #           type: integer
+            #           minimum: 1
+            #           maximum: 5
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                doctorId:
+                                    type: string
+                                    format: uuid
+                                    description: ID of the doctor
+                                # rating:
+                                #     type: integer
+                                #     minimum: 1
+                                #     maximum: 5
             responses:
                 "200":
                     description: Doctor reviews retrieved successfully
@@ -594,54 +759,32 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/Error"
 
-    /appointments/available-slots:
-        get:
-            summary: Get available appointment slots
-            description: Retrieve available time slots for a specific doctor on a specific date
-            tags:
-                - Appointment Management
-            parameters:
-                - name: doctorId
-                  in: query
-                  description: Unique identifier of the doctor
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
-                - name: location
-                  in: query
-                  description: Location of the appointment
-                  required: true
-                  schema:
-                      type: string
-            responses:
-                "200":
-                    description: Available slots retrieved successfully
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/AppointmentState"
-                "401":
-                    $ref: "#/components/responses/UnauthorizedError"
-                "404":
-                    $ref: "#/components/responses/NotFoundError"
-
-    /appointments/{appointmentId}:
         get:
             summary: Get appointment details
             description: Retrieve details of a specific appointment
             tags:
                 - Appointment Management
-            parameters:
-                - name: appointmentId
-                  in: path
-                  description: Unique identifier of the appointment
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
+            # parameters:
+            #     - name: appointmentId
+            #       in: query
+            #       description: Unique identifier of the appointment
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                appointmentId:
+                                    type: string
+                                    format: uuid
+                                    description: Unique identifier of the appointment
+                            required:
+                                - appointmentId
             responses:
                 "200":
                     description: Appointment details retrieved successfully
@@ -661,19 +804,26 @@ paths:
             description: Cancel an existing appointment
             tags:
                 - Appointment Management
-            parameters:
-                - name: appointmentId
-                  in: path
-                  description: Unique identifier of the appointment
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
-                - name: reason
-                  in: query
-                  description: Reason for cancellation
-                  schema:
-                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                appointmentId:
+                                    type: string
+                                    format: uuid
+                                    description: Unique identifier of the appointment
+                                patientId:
+                                    type: string
+                                    format: uuid
+                                    description: Unique identifier of the patient
+                                reason:
+                                    type: string
+                                    description: Reason for cancellation
+                            required:
+                                - appointmentId
             responses:
                 "204":
                     description: Appointment cancelled successfully
@@ -690,20 +840,26 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /appointments/{appointmentId}/reschedule:
-        post:
-            summary: Reschedule appointment
-            description: Reschedule an existing appointment to a new time slot
+    /appointments/available-slots:
+        get:
+            summary: Get available appointment slots
+            description: Retrieve available time slots for a specific doctor on a specific date
             tags:
                 - Appointment Management
-            parameters:
-                - name: appointmentId
-                  in: path
-                  description: Unique identifier of the appointment
-                  required: true
-                  schema:
-                      type: string
-                      format: uuid
+            # parameters:
+            #     - name: doctorId
+            #       in: query
+            #       description: Unique identifier of the doctor
+            #       required: true
+            #       schema:
+            #           type: string
+            #           format: uuid
+            #     - name: location
+            #       in: query
+            #       description: Location of the appointment
+            #       required: true
+            #       schema:
+            #           type: string
             requestBody:
                 required: true
                 content:
@@ -711,6 +867,47 @@ paths:
                         schema:
                             type: object
                             properties:
+                                doctorId:
+                                    type: string
+                                    format: uuid
+                                    description: Unique identifier of the doctor
+                                location:
+                                    type: string
+                                    description: Location of the appointment
+                            required:
+                                - doctorId
+                                - date
+            responses:
+                "200":
+                    description: Available slots retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/AppointmentState"
+                "401":
+                    $ref: "#/components/responses/UnauthorizedError"
+                "404":
+                    $ref: "#/components/responses/NotFoundError"
+
+    /appointments/reschedule:
+        post:
+            summary: Reschedule appointment
+            description: Reschedule an existing appointment to a new time slot
+            tags:
+                - Appointment Management
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                appointmentId:
+                                    type: string
+                                    format: uuid
+                                    description: Unique identifier of the appointment
                                 newDateTime:
                                     type: string
                                     format: date-time
@@ -719,6 +916,7 @@ paths:
                                     type: string
                                     description: Reason for rescheduling
                             required:
+                                - appointmentId
                                 - newDateTime
             responses:
                 "200":
@@ -746,7 +944,7 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/Error"
 
-    /prescriptions:
+    /prescriptions/create:
         post:
             summary: Create a new prescription
             description: Create a new prescription for a patient with medication details and test suggestions
@@ -1167,21 +1365,21 @@ components:
                 - name
                 - address
 
-        Pagination:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    description: Total number of items
-                limit:
-                    type: integer
-                    description: Number of items per page
-                offset:
-                    type: integer
-                    description: Current offset from the first item
-                nextOffset:
-                    type: integer
-                    description: Offset for the next page (null if no more pages)
+        # Pagination:
+        #     type: object
+        #     properties:
+        #         total:
+        #             type: integer
+        #             description: Total number of items
+        #         limit:
+        #             type: integer
+        #             description: Number of items per page
+        #         offset:
+        #             type: integer
+        #             description: Current offset from the first item
+        #         nextOffset:
+        #             type: integer
+        #             description: Offset for the next page (null if no more pages)
 
         Measurement:
             type: object
@@ -1587,7 +1785,6 @@ components:
             type: apiKey
             in: header
             name: X-API-Key
-
-security:
-    - BearerAuth: []
-    - ApiKeyAuth: []
+# security:
+#     - BearerAuth: []
+#     - ApiKeyAuth: []
