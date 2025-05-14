@@ -23,7 +23,7 @@ tags:
       description: Patient health summary information
     - name: Notifications
       description: Patient notification operations
-    - name: Profile Management
+    - name: Patient Profile
       description: Endpoints for managing patient profile information
     - name: Doctor Profile
       description: Endpoints for viewing doctor profiles and information
@@ -35,7 +35,7 @@ tags:
       description: Endpoints for hospital side operations
 
 paths:
-    /dashboard:
+    /patient/dashboard:
         get:
             summary: Get complete patient dashboard data
             description: Retrieve all dashboard information for a specific patient in a single request
@@ -76,7 +76,7 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /appointments-list:
+    /patient/appointments-list:
         get:
             summary: Get patient's upcoming appointments
             description: Retrieve all upcoming appointments for a patient
@@ -123,6 +123,58 @@ paths:
                     $ref: "#/components/responses/ForbiddenError"
                 "404":
                     $ref: "#/components/responses/NotFoundError"
+
+    /patient/ongoing-medications:
+      get:
+        summary: Get ongoing medications of a patient
+        description: Retrieve currently active medications for a given patient
+        tags:
+          - Prescriptions
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: string
+                    format: uuid
+                    example: "patient-uuid-123"
+                required:
+                  - patientId
+        responses:
+          "200":
+            description: List of ongoing medications
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    medications:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          dosage:
+                            type: string
+                          frequency:
+                            type: string
+                          duration:
+                            type: string
+                          instructions:
+                            type: string
+          "400":
+            $ref: "#/components/responses/BadRequestError"
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+          "404":
+            $ref: "#/components/responses/NotFoundError"
+
 
     /prescriptions-list:
         get:
@@ -451,12 +503,12 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
-    /profile:
+    /patient/profile:
         get:
             summary: Get patient profile information
             description: Retrieve complete profile information for a patient
             tags:
-                - Profile Management
+                - Patient Profile
             # parameters:
             #     - name: patientId
             #       in: query
@@ -503,7 +555,7 @@ paths:
             summary: Update patient profile information
             description: Update the complete profile information for a patient
             tags:
-                - Profile Management
+                - Patient Profile
             requestBody:
                 required: true
                 content:
