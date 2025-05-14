@@ -25,6 +25,8 @@ tags:
       description: Patient notification operations
     - name: Patient Profile
       description: Endpoints for managing patient profile information
+    - name: Symptom Tracking
+      description: Endpoints for tracking and managing patient symptoms
     - name: Doctor Profile
       description: Endpoints for viewing doctor profiles and information
     - name: Appointment Management
@@ -396,6 +398,105 @@ paths:
                     $ref: "#/components/responses/ForbiddenError"
                 "404":
                     $ref: "#/components/responses/NotFoundError"
+
+    /patient/symptoms:
+      post:
+        summary: Submit a new symptom entry
+        description: Add a new symptom or mood entry for a patient, timestamped
+        tags:
+          - Symptom Tracking
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: string
+                    format: uuid
+                  symptom:
+                    type: string
+                    example: "Headache with mild nausea"
+                  mood:
+                    type: string
+                    example: "Anxious"
+                  intensity:
+                    type: integer
+                    minimum: 1
+                    maximum: 10
+                    example: 5
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-05-14T14:30:00Z"
+                required:
+                  - patientId
+                  - symptom
+                  - timestamp
+        responses:
+          "201":
+            description: Symptom entry recorded
+          "400":
+            $ref: "#/components/responses/BadRequestError"
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+
+    /patient/symptoms/history:
+      post:
+        summary: Get symptom history of a patient
+        description: Fetch recorded symptoms and moods over a given time range
+        tags:
+          - Symptom Tracking
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: string
+                    format: uuid
+                  fromDate:
+                    type: string
+                    format: date
+                    example: "2025-05-01"
+                  toDate:
+                    type: string
+                    format: date
+                    example: "2025-05-14"
+                required:
+                  - patientId
+        responses:
+          "200":
+            description: Symptom history retrieved successfully
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      symptom:
+                        type: string
+                      mood:
+                        type: string
+                      intensity:
+                        type: integer
+                      timestamp:
+                        type: string
+                        format: date-time
+          "400":
+            $ref: "#/components/responses/BadRequestError"
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+
+
 
     /notifications:
         get:
