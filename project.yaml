@@ -31,6 +31,8 @@ tags:
       description: Endpoints for booking, viewing, and managing appointments
     - name: Prescription Management
       description: Endpoints for creating and managing prescriptions
+    - name: Hospital
+      description: Endpoints for hospital side operations
 
 paths:
     /dashboard:
@@ -294,7 +296,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/MedicalTestDetails"
+                                $ref: "#/components/schemas/MedicalTestDetails"                                 
                 "401":
                     $ref: "#/components/responses/UnauthorizedError"
                 "403":
@@ -1004,6 +1006,35 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Prescription"
+                "400":
+                    $ref: "#/components/responses/BadRequestError"
+                "401":
+                    $ref: "#/components/responses/UnauthorizedError"
+                "403":
+                    $ref: "#/components/responses/ForbiddenError"
+                "404":
+                    $ref: "#/components/responses/NotFoundError"
+
+
+    /hospital/upload-report:
+        post:
+            summary: Upload medical test report
+            description: Upload a medical test report for a patient
+            tags:
+                - Hospital
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/MedicalTestDetails"
+            responses:
+                "200":
+                    description: Report uploaded successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MedicalTestDetails"
                 "400":
                     $ref: "#/components/responses/BadRequestError"
                 "401":
