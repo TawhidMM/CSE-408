@@ -1015,6 +1015,85 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFoundError"
 
+    /hospital/test-bookings/filter:
+      post:
+        summary: Filter and list booked medical tests
+        description: Retrieve booked medical tests based on hospital ID, date range, and report status
+        tags:
+          - Hospital
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hospitalId:
+                    type: string
+                    format: uuid
+                    example: "hospital-uuid-456"
+                  fromDate:
+                    type: string
+                    format: date
+                    example: "2025-05-01"
+                  toDate:
+                    type: string
+                    format: date
+                    example: "2025-05-14"
+                  reportUploaded:
+                    type: boolean
+                    example: false
+        responses:
+          '200':
+            description: Filtered list of test bookings
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TestBooking'
+          "400":
+            $ref: "#/components/responses/BadRequestError"
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+          "403":
+            $ref: "#/components/responses/ForbiddenError"
+          "404":
+            $ref: "#/components/responses/NotFoundError"
+
+
+    /hospital/test-bookings:
+      post:
+        summary: Book a medical test
+        description: Create a new booking for a medical test at a hospital
+        tags:
+          - Hospital
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestBooking'     
+        responses:
+          '201':
+            description: Test booking created successfully
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/TestBooking'
+          "400":
+              $ref: "#/components/responses/BadRequestError"
+          "401":
+              $ref: "#/components/responses/UnauthorizedError"
+          "403":
+              $ref: "#/components/responses/ForbiddenError"
+          "404":
+              $ref: "#/components/responses/NotFoundError"
+         
 
     /hospital/upload-report:
         post:
@@ -1776,6 +1855,33 @@ components:
                 - medications
                 - symptoms
                 - diagnosis
+
+        TestBooking:
+          allOf:
+            - $ref: "#/components/schemas/patient"
+            - type: object                             
+              properties:
+                patientId:
+                  type: string
+                  format: uuid
+                  example: "patient-uuid-123"
+                hospitalId:
+                  type: string
+                  format: uuid
+                  example: "hospital-uuid-456"
+                testName:
+                  type: string
+                  example: "Complete Blood Count (CBC)"
+                referringDoctorId:
+                  type: string
+                  format: uuid
+                  example: "doctor-uuid-789"
+                orderedDate:
+                  type: string
+                  format: date-time
+                  example: "2025-06-10T09:30:00Z"
+
+
 
     responses:
         UnauthorizedError:
